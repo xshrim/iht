@@ -225,6 +225,7 @@ func Get(url string, timeout time.Duration, header map[string]string) (data []by
 	}
 	defer resp.Body.Close()
 
+	fmt.Println(resp.Header.Get("Set-Cookie"))
 	data, err = ioutil.ReadAll(resp.Body)
 
 	return
@@ -252,7 +253,7 @@ func Post(url, payload string, timeout time.Duration, header map[string]string) 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	gol.Info(Http2Curl(req))
+	gol.Debug(Http2Curl(req))
 
 	resp, err := client.Do(req)
 	if err != nil {

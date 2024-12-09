@@ -1,10 +1,13 @@
 package pan
 
 import (
+	"encoding/json"
 	"fmt"
 	"iht/utils"
 	"net/url"
 	"time"
+
+	"github.com/xshrim/gol/tk"
 )
 
 var headers = map[string]string{
@@ -18,6 +21,22 @@ var headers = map[string]string{
 	"sec-ch-ua-mobile":   "?0",
 	"sec-ch-ua-platform": "Linux",
 	"User-Agent":         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+}
+
+type ExportDirResult struct {
+	ExportId string `json:"export_id"`
+	FileId   string `json:"file_id"`
+	FileName string `json:"file_name"`
+	PickCode string `json:"pick_code"`
+}
+
+type ExportDownloadInfo struct {
+	UserId   int64  `json:"user_id"`
+	FileId   string `json:"file_id"`
+	FileName string `json:"file_name"`
+	FileSize string `json:"file_size"`
+	FileUrl  string `json:"file_url"`
+	PickCode string `json:"pick_code"`
 }
 
 func ExportDir(cookie, dirid string) (string, error) {
@@ -42,6 +61,96 @@ func ExportDir(cookie, dirid string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(string(data), err)
-	return "", nil
+	if val := tk.Jsquery(string(data), ".state"); val != nil {
+		if v, ok := val.(bool); ok && v {
+			if expid, ok := tk.Jsquery(string(data), ".data.export_id").(float64); ok {
+				return fmt.Sprintf("%d", int64(expid)), nil
+			} else {
+				return "", fmt.Errorf("export dir failed: invalid export id")
+			}
+		} else {
+			return "", fmt.Errorf("export dir failed: %v", tk.Jsquery(string(data), ".error"))
+		}
+	} else {
+		return "", fmt.Errorf("export dir failed: %v", string(data))
+	}
+}
+
+func ExportResult(cookie, expid string) (ExportDirResult, error) {
+	urlstr := fmt.Sprintf("https://webapi.115.com/files/export_dir?export_id=%s", expid)
+
+	header := make(map[string]string)
+	for key, value := range headers {
+		header[key] = value
+	}
+	header["Cookie"] = cookie
+
+	retry := 5
+	for {
+		data, err := utils.Get(urlstr, time.Second*30, header)
+		if err != nil {
+			return ExportDirResult{}, err
+		}
+
+		if val := tk.Jsquery(string(data), ".state"); val != nil {
+			if v, ok := val.(bool); ok && v {
+				edr := ExportDirResult{}
+				expdata, _ := tk.Jsquery(string(data), ".data").(any)
+				if err := json.Unmarshal([]byte(tk.Jsonify(expdata)), &edr); err != nil {
+					if retry <= 0 {
+						return ExportDirResult{}, fmt.Errorf("get export dir result failed: %v", err)
+					} else {
+						retry--
+						time.Sleep(time.Second * 6)
+						continue
+					}
+				}
+				return edr, nil
+			} else {
+				return ExportDirResult{}, fmt.Errorf("get export dir result failed: %v", tk.Jsquery(string(data), ".error"))
+			}
+		} else {
+			return ExportDirResult{}, fmt.Errorf("get export dir result failed: %v", string(data))
+		}
+	}
+}
+
+func ExportPath(cookie, pickcode string) (ExportDownloadInfo, error) {
+	urlstr := fmt.Sprintf("https://webapi.115.com/files/download?pickcode=%s", pickcode)
+
+	header := make(map[string]string)
+	for key, value := range headers {
+		header[key] = value
+	}
+	header["Cookie"] = cookie
+
+	data, err := utils.Get(urlstr, time.Second*30, header)
+	if err != nil {
+		return ExportDownloadInfo{}, err
+	}
+
+	if val := tk.Jsquery(string(data), ".state"); val != nil {
+		edi := ExportDownloadInfo{}
+		if err := json.Unmarshal(data, &edi); err != nil {
+			return ExportDownloadInfo{}, fmt.Errorf("get export download path failed: %v", err)
+		}
+		return edi, nil
+	} else {
+		return ExportDownloadInfo{}, fmt.Errorf("get export download path failed: %v", string(data))
+	}
+}
+
+func ExportDownload(cookie, fileurl string) ([]byte, error) {
+	urlstr := fileurl
+	header := make(map[string]string)
+	for key, value := range headers {
+		header[key] = value
+	}
+	header["Cookie"] = cookie
+
+	data, err := utils.Get(urlstr, time.Second*30, header)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
