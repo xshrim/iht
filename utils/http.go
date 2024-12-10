@@ -199,7 +199,7 @@ func TimingRequest(url, header, payload string, timeout int) (latency int64, msg
 	return
 }
 
-func Get(url string, timeout time.Duration, header map[string]string) (data []byte, err error) {
+func Get(url string, timeout time.Duration, header map[string]string) (data []byte, cookie string, err error) {
 
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -225,13 +225,21 @@ func Get(url string, timeout time.Duration, header map[string]string) (data []by
 	}
 	defer resp.Body.Close()
 
-	fmt.Println(resp.Header.Get("Set-Cookie"))
+	// cookie = ""
+	// for _, ck := range resp.Cookies() {
+	// 	cookie += fmt.Sprintf("%s=%s;", ck.Name, ck.Value)
+	// }
+	// cookie = strings.TrimSuffix(cookie, ";")
+	for _, ck := range resp.Header.Values("Set-Cookie") {
+		cookie = ck
+	}
+
 	data, err = ioutil.ReadAll(resp.Body)
 
 	return
 }
 
-func Post(url, payload string, timeout time.Duration, header map[string]string) (data []byte, err error) {
+func Post(url, payload string, timeout time.Duration, header map[string]string) (data []byte, cookie string, err error) {
 
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -260,6 +268,10 @@ func Post(url, payload string, timeout time.Duration, header map[string]string) 
 		return
 	}
 	defer resp.Body.Close()
+
+	for _, ck := range resp.Header.Values("Set-Cookie") {
+		cookie = ck
+	}
 
 	data, err = ioutil.ReadAll(resp.Body)
 

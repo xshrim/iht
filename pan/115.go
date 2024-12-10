@@ -37,6 +37,7 @@ type ExportDownloadInfo struct {
 	FileSize string `json:"file_size"`
 	FileUrl  string `json:"file_url"`
 	PickCode string `json:"pick_code"`
+	Cookie   string `json:"cookie"`
 }
 
 func ExportDir(cookie, dirid string) (string, error) {
@@ -56,7 +57,7 @@ func ExportDir(cookie, dirid string) (string, error) {
 	header["Content-Type"] = "application/x-www-form-urlencoded"
 	header["Cookie"] = cookie
 
-	data, err := utils.Post(urlstr, formDataStr, time.Second*30, header)
+	data, _, err := utils.Post(urlstr, formDataStr, time.Second*30, header)
 	if err != nil {
 		return "", err
 	}
@@ -87,7 +88,7 @@ func ExportResult(cookie, expid string) (ExportDirResult, error) {
 
 	retry := 5
 	for {
-		data, err := utils.Get(urlstr, time.Second*30, header)
+		data, _, err := utils.Get(urlstr, time.Second*30, header)
 		if err != nil {
 			return ExportDirResult{}, err
 		}
@@ -124,7 +125,7 @@ func ExportPath(cookie, pickcode string) (ExportDownloadInfo, error) {
 	}
 	header["Cookie"] = cookie
 
-	data, err := utils.Get(urlstr, time.Second*30, header)
+	data, respcookie, err := utils.Get(urlstr, time.Second*30, header)
 	if err != nil {
 		return ExportDownloadInfo{}, err
 	}
@@ -134,6 +135,7 @@ func ExportPath(cookie, pickcode string) (ExportDownloadInfo, error) {
 		if err := json.Unmarshal(data, &edi); err != nil {
 			return ExportDownloadInfo{}, fmt.Errorf("get export download path failed: %v", err)
 		}
+		edi.Cookie = respcookie
 		return edi, nil
 	} else {
 		return ExportDownloadInfo{}, fmt.Errorf("get export download path failed: %v", string(data))
@@ -147,8 +149,10 @@ func ExportDownload(cookie, fileurl string) ([]byte, error) {
 		header[key] = value
 	}
 	header["Cookie"] = cookie
+	// header["Cookie"] = "44b16881664cb98f87584819b332961e=55c3aee57415e0e2031c367e652794da; expires=Tue, 10-Dec-2024 03:12:17 GMT; Max-Age=978; path=/6757ace041b94a2535948cfdc00ae76de00da427/; domain=115.com"
+	// urlstr = "https://cdnfhnfile.115.com/6757ace041b94a2535948cfdc00ae76de00da427/%E6%A0%B9%E7%9B%AE%E5%BD%9520241210105216_%E7%9B%AE%E5%BD%95%E6%A0%91.txt?t=1733800337&u=1143614&s=104857600&d=974333514-b5p5a81tht66b8l0u-0&c=0&f=3&k=3c19ba0f59cd62cc145271d5c632bf60&us=1048576000&uc=10&v=1"
 
-	data, err := utils.Get(urlstr, time.Second*30, header)
+	data, _, err := utils.Get(urlstr, time.Second*30, header)
 	if err != nil {
 		return nil, err
 	}

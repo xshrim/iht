@@ -16,6 +16,9 @@ func main() {
 	edi, err := pan.ExportPath(cookie, edr.PickCode)
 	fmt.Println(edi, err)
 
-	data, err := pan.ExportDownload(cookie, edi.FileUrl)
+	data, err := pan.ExportDownload(edi.Cookie, edi.FileUrl)
 	fmt.Println(string(data), err)
+
+	// data, err := pan.ExportDownload(cookie, "")
+	// fmt.Println(string(data), err)
 }
