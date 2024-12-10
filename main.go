@@ -19,6 +19,11 @@ func main() {
 	data, err := pan.ExportDownload(edi.Cookie, edi.FileUrl)
 	fmt.Println(string(data), err)
 
+	err = pan.ExportDelete(cookie, edi.FileId)
+	fmt.Println(err)
+
+	// fmt.Println(edi.FileId)
+
 	// data, err := pan.ExportDownload(cookie, "")
 	// fmt.Println(string(data), err)
 }

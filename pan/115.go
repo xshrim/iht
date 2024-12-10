@@ -158,3 +158,36 @@ func ExportDownload(cookie, fileurl string) ([]byte, error) {
 	}
 	return data, nil
 }
+
+func ExportDelete(cookie, fid string) error {
+	urlstr := "https://webapi.115.com/rb/delete"
+
+	header := make(map[string]string)
+	for key, value := range headers {
+		header[key] = value
+	}
+
+	header["Content-Type"] = "application/x-www-form-urlencoded"
+	header["Cookie"] = cookie
+
+	formValues := url.Values{}
+	formValues.Set("pid", "0")
+	formValues.Set("fid[0]", fid)
+	formValues.Set("ignore_warn", "1")
+	formDataStr := formValues.Encode()
+
+	data, _, err := utils.Post(urlstr, formDataStr, time.Second*30, header)
+	if err != nil {
+		return fmt.Errorf("delete export dir result file failed: %v", err)
+	}
+
+	if val := tk.Jsquery(string(data), ".state"); val != nil {
+		if v, ok := val.(bool); ok && v {
+			return nil
+		} else {
+			return fmt.Errorf("delete export dir result file failed: %v", tk.Jsquery(string(data), ".error"))
+		}
+	} else {
+		return fmt.Errorf("delete export dir result file failed: %v", string(data))
+	}
+}
