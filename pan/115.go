@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"iht/utils"
 	"net/url"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/xshrim/gol/tk"
@@ -190,4 +192,36 @@ func ExportDelete(cookie, fid string) error {
 	} else {
 		return fmt.Errorf("delete export dir result file failed: %v", string(data))
 	}
+}
+
+func ExportTree(cookie, dirid, path string) (string, error) {
+	expid, err := ExportDir(cookie, dirid)
+	if err != nil {
+		return "", err
+	}
+
+	edr, err := ExportResult(cookie, expid)
+	if err != nil {
+		return "", err
+	}
+
+	edi, err := ExportPath(cookie, edr.PickCode)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := ExportDownload(edi.Cookie, edi.FileUrl)
+	if err != nil {
+		return "", err
+	}
+
+	if err := os.WriteFile(path, data, 0666); err != nil {
+		return "", err
+	}
+
+	if err := ExportDelete(cookie, edi.FileId); err != nil {
+		return "", err
+	}
+
+	return filepath.Abs(path)
 }
