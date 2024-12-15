@@ -1,16 +1,92 @@
 package pan
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"iht/pkg/cfg"
 	"iht/utils"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/xshrim/gol"
 	"github.com/xshrim/gol/tk"
+	"golang.org/x/text/encoding/unicode"
 )
+
+var mediaExt = []string{
+	".mp4",
+	".mkv",
+	".avi",
+	".mov",
+	".flv",
+	".wmv",
+	".mp3",
+	".wav",
+	".flac",
+	".aac",
+	".m4a",
+	".ogg",
+	".webm",
+	".ts",
+	".m3u8",
+	".flv",
+	".f4v",
+	".rmvb",
+	".rm",
+	".3gp",
+	".wmv",
+	".asf",
+	".m4v",
+	".m4p",
+	".m4b",
+	".m4r",
+	".m4v",
+	".m4a",
+}
+
+var captionExt = []string{
+	".srt",
+	".ass",
+	".ssa",
+	".vtt",
+	".sbv",
+	".stl",
+	".dfxp",
+	".ttml",
+	".sub",
+	".idx",
+}
+
+var ignoreExt = []string{
+	".jpg",
+	".jpeg",
+	".png",
+	".gif",
+	".bmp",
+	".webp",
+	".ico",
+	".svg",
+	".tif",
+	".tiff",
+	".psd",
+	".heic",
+	".heif",
+	".dng",
+	".cr2",
+	".nef",
+	".orf",
+	".arw",
+	".txt",
+	".nfo",
+	".url",
+	".htm",
+	".html",
+}
 
 var headers = map[string]string{
 
@@ -40,6 +116,16 @@ type ExportDownloadInfo struct {
 	FileUrl  string `json:"file_url"`
 	PickCode string `json:"pick_code"`
 	Cookie   string `json:"cookie"`
+}
+
+func contains(elems []string, s string) bool {
+	s = strings.TrimLeft(s, "./")
+	for _, elem := range elems {
+		if elem == s || strings.HasPrefix(filepath.Dir(elem)+"/", s+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 func ExportDir(cookie, dirid string) (string, error) {
@@ -194,23 +280,44 @@ func ExportDelete(cookie, fid string) error {
 	}
 }
 
-func ExportTree(cookie, dirid, path string) (string, error) {
+func ExportTree(cookie, dirid string) ([]byte, error) {
 	expid, err := ExportDir(cookie, dirid)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	edr, err := ExportResult(cookie, expid)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	edi, err := ExportPath(cookie, edr.PickCode)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	data, err := ExportDownload(edi.Cookie, edi.FileUrl)
+	if err != err {
+		return nil, err
+	}
+
+	if err := ExportDelete(cookie, edi.FileId); err != nil {
+		return nil, err
+	}
+
+	// UTF16转UTF8
+	decoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder()
+	idata, err := decoder.Bytes(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return idata, nil
+}
+
+func ExportTreeToFile(cookie, dirid, path string) (string, error) {
+
+	data, err := ExportTree(cookie, dirid)
 	if err != nil {
 		return "", err
 	}
@@ -219,9 +326,126 @@ func ExportTree(cookie, dirid, path string) (string, error) {
 		return "", err
 	}
 
-	if err := ExportDelete(cookie, edi.FileId); err != nil {
-		return "", err
+	return filepath.Abs(path)
+}
+
+func Tree2List(data []byte) ([]string, error) {
+	var list []string
+	var stack []string
+	layer := 0
+
+	var reader *bufio.Reader
+	file, err := os.Open(string(data))
+
+	if err != nil {
+		reader = bufio.NewReader(bytes.NewReader(data))
+	} else {
+		defer file.Close()
+		reader = bufio.NewReader(file)
 	}
 
-	return filepath.Abs(path)
+	for {
+		bline, _, err := reader.ReadLine()
+		if err != nil {
+			// if err == io.EOF {
+			// 	break
+			// }
+			break
+		}
+
+		line := string(bline)
+
+		if strings.HasSuffix(line, "根目录") {
+			continue
+		} else {
+			iline := strings.Split(line, "|-")
+			head := iline[0]
+			name := iline[1]
+			curlayer := strings.Count(head, "|")
+			if curlayer <= layer {
+				list = append(list, strings.Join(stack, "/"))
+				stack = stack[:layer-1]
+				if curlayer < layer {
+					list = append(list, strings.Join(stack, "/"))
+					stack = stack[:curlayer-1]
+				}
+			}
+			stack = append(stack, name)
+			layer = curlayer
+		}
+	}
+
+	return list, nil
+}
+
+func Tree2Lib(iurl, dir string, data []byte) error {
+	list, err := Tree2List(data)
+	if err != nil {
+		return err
+	}
+
+	var items []string
+
+	for _, item := range list {
+		ext := filepath.Ext(item)
+		if utils.Contains(mediaExt, ext) && !utils.Contains(ignoreExt, ext) {
+			fpath := filepath.Join(dir, fmt.Sprintf("%s.strm", item))
+			items = append(items, fpath)
+			if _, err := os.Stat(fpath); os.IsNotExist(err) {
+				// create directory if necessary
+				if err := os.MkdirAll(filepath.Dir(fpath), 0777); err != nil {
+					return err
+				}
+				urlstr, _ := url.JoinPath(iurl, item)
+				// writefile with override
+				if err := os.WriteFile(fpath, []byte(urlstr), 0666); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return CleanNotExist(dir, items)
+}
+
+func CleanNotExist(dir string, list []string) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+
+		// only remove directories and strm file that not exist in list
+		if !contains(list, path) && (info.IsDir() || filepath.Ext(path) == ".strm") {
+			ftype := "file"
+			if info.IsDir() {
+				ftype = "directory"
+			}
+
+			if err := os.RemoveAll(path); err != nil {
+				gol.Warnf("Redundant %s %s remove failed: %v", ftype, path, err)
+			} else {
+				gol.Infof("Redundant %s %s remove succeed", ftype, path)
+			}
+		}
+
+		return nil
+	})
+}
+
+func Go() {
+	gol.Info("Start to export directory tree")
+	// pan.ExportTreeToFile(cfg.Conf.Cookie, cfg.Conf.Did, cfg.Conf.Tree)
+	data, err := ExportTree(cfg.Conf.Cookie, cfg.Conf.Did)
+	if err != nil {
+		gol.Errorf("Export directory tree failed: %v", err)
+		return
+	}
+	gol.Info("Export directory tree succeed")
+
+	gol.Info("Start to convert directory tree to library")
+	if err := Tree2Lib(cfg.Conf.Url, cfg.Conf.Base, data); err != nil {
+		gol.Errorf("Convert directory tree to library failed: %v", err)
+		return
+	}
+	gol.Info("Convert directory tree to library succeed")
 }
