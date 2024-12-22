@@ -11,7 +11,7 @@ func crontab() {
 	ctab := cron.New()
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(10)
 
 	if err := ctab.AddJob("* * * * *", func() { wg.Done(); fmt.Println("Hello, World!") }); err != nil {
 		fmt.Println(err)
