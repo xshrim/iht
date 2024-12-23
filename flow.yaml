@@ -1,0 +1,26 @@
+name: demo
+steps:
+  - name: stage1
+    type: rename
+    actions:
+      - name: add prefix
+        kind: add
+        mode: "index" # or "prefix", "suffix"
+        index: 0
+        value: "prefix_"
+      - name: delete substring
+        kind: delete
+        mode: "regexp" # or "plain", "index"
+        index: 1 # 0: all
+        value: "s.*b" # or "0-3"
+      - name: replace substring
+        kind: replace
+        mode: "regexp" # or "plain", "index"
+        expr: "s.*b" # or "0-3"
+        index: 1 # 0: all
+        value: "abc"
+      - name: shift substring
+        kind: shift
+        mode: "regexp" # or "plain", "index"
+        expr: "s.*b" # or "0-3"
+        index: 2
