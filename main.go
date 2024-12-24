@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"iht/pkg/cron"
+	"iht/pkg/pan"
 	"sync"
 )
 
@@ -27,7 +28,7 @@ func crontab() {
 
 func main() {
 	// TODO crontab
-	// pan.Go()
+	pan.Go()
 
-	crontab()
+	// crontab()
 }

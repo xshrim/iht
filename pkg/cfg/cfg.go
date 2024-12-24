@@ -13,6 +13,7 @@ type Config struct {
 	Base   string `json:"base"`
 	Tree   string `json:"tree"`
 	Url    string `json:"url"`
+	Prefix string `json:"prefix"`
 }
 
 var Conf Config
@@ -26,7 +27,8 @@ func init() {
 	did := flag.String("did", "", "115 directory id")
 	base := flag.String("base", "media", "media home directory")
 	tree := flag.String("tree", "", "directory tree path")
-	url := flag.String("url", "", "media url prefix path")
+	prefix := flag.String("prefix", "", "media url prefix path")
+	url := flag.String("url", "", "media url")
 	flag.Parse()
 
 	if *cookie != "" {
@@ -44,9 +46,12 @@ func init() {
 	if *url != "" {
 		Conf.Url = *url
 	}
+	if *prefix != "" {
+		Conf.Prefix = *prefix
+	}
 
-	if Conf.Cookie == "" || Conf.Did == "" || Conf.Base == "" || Conf.Url == "" {
+	if Conf.Cookie == "" || Conf.Did == "" || Conf.Base == "" || Conf.Url == "" || Conf.Prefix == "" {
 		// print("config variables <cookie | did | base | url> are not set")
-		panic("config variables <cookie | did | base | url> are not set")
+		panic("config variables <cookie | did | base | url | prefix> are not set")
 	}
 }

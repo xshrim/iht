@@ -378,7 +378,7 @@ func Tree2List(data []byte) ([]string, error) {
 	return list, nil
 }
 
-func Tree2Lib(iurl, dir string, data []byte) error {
+func Tree2Lib(iurl, prefix, dir string, data []byte) error {
 	list, err := Tree2List(data)
 	if err != nil {
 		return err
@@ -396,7 +396,7 @@ func Tree2Lib(iurl, dir string, data []byte) error {
 				if err := os.MkdirAll(filepath.Dir(fpath), 0777); err != nil {
 					return err
 				}
-				urlstr, _ := url.JoinPath(iurl, item)
+				urlstr, _ := url.JoinPath(iurl, "/d", prefix, item)
 				// writefile with override
 				if err := os.WriteFile(fpath, []byte(urlstr), 0666); err != nil {
 					return err
@@ -443,7 +443,7 @@ func Go() {
 	gol.Info("Export directory tree succeed")
 
 	gol.Info("Start to convert directory tree to library")
-	if err := Tree2Lib(cfg.Conf.Url, cfg.Conf.Base, data); err != nil {
+	if err := Tree2Lib(cfg.Conf.Url, cfg.Conf.Prefix, cfg.Conf.Base, data); err != nil {
 		gol.Errorf("Convert directory tree to library failed: %v", err)
 		return
 	}
