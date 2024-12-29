@@ -9,7 +9,8 @@ import (
 
 type Config struct {
 	Cookie string `json:"cookie"`
-	Did    string `json:"did"`
+	Cid    string `json:"cid"`
+	Cpath  string `json:"cpath"`
 	Base   string `json:"base"`
 	Tree   string `json:"tree"`
 	Url    string `json:"url"`
@@ -24,7 +25,8 @@ func init() {
 	}
 
 	cookie := flag.String("cookie", "", "115 cookie")
-	did := flag.String("did", "", "115 directory id")
+	cid := flag.String("cid", "", "115 directory/file id")
+	cpath := flag.String("cpath", "", "115 directory/file path")
 	base := flag.String("base", "media", "media home directory")
 	tree := flag.String("tree", "", "directory tree path")
 	prefix := flag.String("prefix", "", "media url prefix path")
@@ -34,8 +36,11 @@ func init() {
 	if *cookie != "" {
 		Conf.Cookie = *cookie
 	}
-	if *did != "" {
-		Conf.Did = *did
+	if *cid != "" {
+		Conf.Cid = *cid
+	}
+	if *cpath != "" {
+		Conf.Cpath = *cpath
 	}
 	if *base != "" {
 		Conf.Base = *base
@@ -50,8 +55,7 @@ func init() {
 		Conf.Prefix = *prefix
 	}
 
-	if Conf.Cookie == "" || Conf.Did == "" || Conf.Base == "" || Conf.Url == "" || Conf.Prefix == "" {
-		// print("config variables <cookie | did | base | url> are not set")
-		panic("config variables <cookie | did | base | url | prefix> are not set")
+	if Conf.Cookie == "" || (Conf.Cid == "" && Conf.Cpath == "") || Conf.Base == "" || Conf.Url == "" || Conf.Prefix == "" {
+		panic("config variables <cookie | cid | cpath | base | url | prefix> are not set")
 	}
 }

@@ -28,7 +28,17 @@ func crontab() {
 
 func main() {
 	// TODO crontab
-	pan.Go()
+	// pan.ToFile()
+	pan.Export()
+
+	// fitem, _ := pan.Locate("/我的视频/电影/日韩/肮脏")
+	// fmt.Println(fitem)
+
+	// flist, _ := pan.List(fitem.Cid)
+	// fmt.Println(flist)
+
+	// attr, _ := pan.Attr(fitem.Cid)
+	// fmt.Println(attr)
 
 	// crontab()
 }
