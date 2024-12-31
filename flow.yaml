@@ -5,20 +5,27 @@ steps:
     actions:
       - name: add prefix
         kind: add
-        mode: "index" # or "prefix", "suffix"
+        mode: "index" #  "prefix", "suffix", "index", "regexp"
+        expr: ""
         index: 0
         value: "prefix_"
       - name: delete substring
         kind: delete
-        mode: "regexp" # or "plain", "index"
-        index: 1 # 0: all
-        value: "s.*b" # or "0-3"
+        mode: "regexp" # "plain", "index", "prefix", "suffix", "regexp"
+        expr: "月" # or "1-3"
+        index: 3 # 0: all
       - name: replace substring
         kind: replace
-        mode: "regexp" # or "plain", "index"
-        expr: "s.*b" # or "0-3"
-        index: 1 # 0: all
-        value: "abc"
+        mode: "regexp" # "plain", "index", "prefix", "suffix", "regexp"
+        expr: "\\d{3}" # or "0-3"
+        index: 3 # 0: all
+        value: "OKKKKKK"
+      - name: add sequence
+        kind: seq
+        mode: "prefix" # or "index", "suffix", "regexp"
+        expr: "01." # or "Ⅰ"
+        index: 0
+        value: ""
       - name: shift substring
         kind: shift
         mode: "regexp" # or "plain", "index"
