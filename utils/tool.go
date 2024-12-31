@@ -119,6 +119,10 @@ func Contains[T comparable](elems []T, v T) bool {
 }
 
 func Seq(sample string, i int) string {
+	if i < 1 {
+		return ""
+	}
+
 	suffix := ""
 	if strings.HasSuffix(sample, ".") {
 		suffix = "."
