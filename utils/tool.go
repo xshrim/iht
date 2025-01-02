@@ -182,3 +182,34 @@ func Seq(sample string, i int) string {
 		return fmt.Sprintf("%d", i)
 	}
 }
+
+func Index(str, sub string) []int {
+	var positions []int
+	if sub == "" {
+		return positions // 如果子串为空，返回空数组
+	}
+
+	strs := []rune(str)
+	subs := []rune(sub)
+
+	offset := 0
+	for i := range strs {
+		if i < offset {
+			continue
+		}
+
+		found := true
+		for j := range subs {
+			if strs[i+j] != subs[j] {
+				found = false
+				break
+			}
+		}
+		if found {
+			positions = append(positions, i)
+			offset = i + 1
+		}
+	}
+
+	return positions
+}

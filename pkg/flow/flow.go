@@ -29,8 +29,8 @@ type Rename struct {
 	Kind  string `json:"kind"`
 	Mode  string `json:"mode"`
 	Expr  string `json:"expr"`
-	Index int    `json:"index"`
 	Value string `json:"value"`
+	Num   int    `json:"num"`
 }
 
 func (r Rename) Add(strs []string) []string {
@@ -42,26 +42,55 @@ func (r Rename) Add(strs []string) []string {
 		case "suffix":
 			output = append(output, str+r.Value)
 		case "index":
+			var err error
+			start := 1
 			istrs := []rune(str)
-			index := r.Index
-			if index < 0 {
-				index = len(istrs) + 1 + index
+			ranger := strings.Split(r.Expr, ":")
+			if ranger[0] != "" {
+				start, err = strconv.Atoi(ranger[0])
+				if err != nil {
+					output = append(output, str)
+					break
+				}
 			}
-			if index <= 0 {
-				index = 1
-			} else if index > len(istrs) {
-				index = len(istrs) + 1
-			}
-			index -= 1
 
-			output = append(output, string(istrs[:index])+r.Value+string(istrs[index:]))
+			if start == 0 {
+				start = 1
+			}
+			if start < 0 {
+				start = len(istrs) + 1 + start
+			}
+
+			if start > len(istrs) {
+				output = append(output, str+r.Value)
+				break
+			}
+
+			if len(istrs) > 0 {
+				start -= 1
+			}
+
+			output = append(output, string(istrs[:start])+r.Value+string(istrs[start:]))
+			// istrs := []rune(str)
+			// index := r.Index
+			// if index < 0 {
+			// 	index = len(istrs) + 1 + index
+			// }
+			// if index <= 0 {
+			// 	index = 1
+			// } else if index > len(istrs) {
+			// 	index = len(istrs) + 1
+			// }
+			// index -= 1
+
+			// output = append(output, string(istrs[:index])+r.Value+string(istrs[index:]))
 		case "regexp":
-			index := r.Index
-			if r.Index <= 0 {
-				index = -1
+			num := r.Num
+			if r.Num <= 0 {
+				num = -1
 			}
 			if exp, err := regexp.Compile(r.Expr); err == nil {
-				idxs := exp.FindAllStringIndex(str, index)
+				idxs := exp.FindAllStringIndex(str, num)
 				for i, idx := range idxs {
 					str = str[:idx[0]+i*len(r.Value)] + r.Value + str[idx[0]+i*len(r.Value):]
 				}
@@ -80,11 +109,11 @@ func (r Rename) Delete(strs []string) []string {
 	for _, str := range strs {
 		switch r.Mode {
 		case "plain":
-			index := r.Index
-			if r.Index <= 0 {
-				index = -1
+			num := r.Num
+			if r.Num <= 0 {
+				num = -1
 			}
-			output = append(output, strings.Replace(str, r.Expr, "", index))
+			output = append(output, strings.Replace(str, r.Expr, "", num))
 		case "prefix":
 			output = append(output, strings.TrimPrefix(str, r.Expr))
 		case "suffix":
@@ -94,7 +123,7 @@ func (r Rename) Delete(strs []string) []string {
 			start := 1
 			end := 0
 			istrs := []rune(str)
-			ranger := strings.Split(r.Expr, "-")
+			ranger := strings.Split(r.Expr, ":")
 			if ranger[0] != "" {
 				start, err = strconv.Atoi(ranger[0])
 				if err != nil {
@@ -113,22 +142,33 @@ func (r Rename) Delete(strs []string) []string {
 						break
 					}
 				}
-			}
-
-			if start <= 0 {
-				start = 1
-			}
-			if end == 0 {
+			} else {
 				end = start
 			}
 
+			if start == 0 {
+				start = 1
+			}
+			if end == 0 {
+				end = 1
+			}
+			if start < 0 {
+				start = len(istrs) + 1 + start
+			}
+			if end < 0 {
+				end = len(istrs) + 1 + end
+			}
+
+			if start > len(istrs) {
+				output = append(output, str)
+				break
+			}
 			if end > len(istrs) {
 				end = len(istrs)
 			}
 
-			if start > len(istrs) || start > end {
-				output = append(output, str)
-				break
+			if start > end {
+				start, end = end, start
 			}
 
 			start -= 1
@@ -136,7 +176,7 @@ func (r Rename) Delete(strs []string) []string {
 			output = append(output, string(istrs[:start])+string(istrs[end:]))
 		case "regexp":
 			if exp, err := regexp.Compile(r.Expr); err == nil {
-				if r.Index <= 0 {
+				if r.Num <= 0 {
 					output = append(output, exp.ReplaceAllString(str, ""))
 					break
 				}
@@ -144,7 +184,7 @@ func (r Rename) Delete(strs []string) []string {
 				offset := 0
 				idxs := exp.FindAllStringIndex(str, -1)
 				for i, idx := range idxs {
-					if i >= r.Index {
+					if i >= r.Num {
 						break
 					}
 
@@ -166,11 +206,11 @@ func (r Rename) Replace(strs []string) []string {
 	for _, str := range strs {
 		switch r.Mode {
 		case "plain":
-			index := r.Index
-			if r.Index <= 0 {
-				index = -1
+			num := r.Num
+			if r.Num <= 0 {
+				num = -1
 			}
-			output = append(output, strings.Replace(str, r.Expr, r.Value, index))
+			output = append(output, strings.Replace(str, r.Expr, r.Value, num))
 		case "prefix":
 			output = append(output, r.Value+strings.TrimPrefix(str, r.Expr))
 		case "suffix":
@@ -180,7 +220,7 @@ func (r Rename) Replace(strs []string) []string {
 			start := 1
 			end := 0
 			istrs := []rune(str)
-			ranger := strings.Split(r.Expr, "-")
+			ranger := strings.Split(r.Expr, ":")
 			if ranger[0] != "" {
 				start, err = strconv.Atoi(ranger[0])
 				if err != nil {
@@ -199,22 +239,33 @@ func (r Rename) Replace(strs []string) []string {
 						break
 					}
 				}
-			}
-
-			if start <= 0 {
-				start = 1
-			}
-			if end == 0 {
+			} else {
 				end = start
 			}
 
+			if start == 0 {
+				start = 1
+			}
+			if end == 0 {
+				end = 1
+			}
+			if start < 0 {
+				start = len(istrs) + 1 + start
+			}
+			if end < 0 {
+				end = len(istrs) + 1 + end
+			}
+
+			if start > len(istrs) {
+				output = append(output, str)
+				break
+			}
 			if end > len(istrs) {
 				end = len(istrs)
 			}
 
-			if start > len(istrs) || start > end {
-				output = append(output, str)
-				break
+			if start > end {
+				start, end = end, start
 			}
 
 			start -= 1
@@ -222,7 +273,7 @@ func (r Rename) Replace(strs []string) []string {
 			output = append(output, string(istrs[:start])+r.Value+string(istrs[end:]))
 		case "regexp":
 			if exp, err := regexp.Compile(r.Expr); err == nil {
-				if r.Index <= 0 {
+				if r.Num <= 0 {
 					output = append(output, exp.ReplaceAllString(str, r.Value))
 					break
 				}
@@ -230,7 +281,7 @@ func (r Rename) Replace(strs []string) []string {
 				offset := 0
 				idxs := exp.FindAllStringIndex(str, -1)
 				for i, idx := range idxs {
-					if i >= r.Index {
+					if i >= r.Num {
 						break
 					}
 
@@ -249,11 +300,42 @@ func (r Rename) Replace(strs []string) []string {
 func (r Rename) Seq(strs []string) []string {
 	var output []string
 	for i, str := range strs {
+		seqstr := utils.Seq(r.Value, i+1)
 		switch r.Mode {
 		case "prefix":
-			output = append(output, utils.Seq(r.Expr, i+1)+strings.TrimPrefix(str, r.Expr))
+			output = append(output, seqstr+str)
 		case "suffix":
-			output = append(output, strings.TrimSuffix(str, r.Expr)+r.Value)
+			output = append(output, str+seqstr)
+		case "index":
+			var err error
+			start := 1
+			istrs := []rune(str)
+			ranger := strings.Split(r.Expr, ":")
+			if ranger[0] != "" {
+				start, err = strconv.Atoi(ranger[0])
+				if err != nil {
+					output = append(output, str)
+					break
+				}
+			}
+
+			if start == 0 {
+				start = 1
+			}
+			if start < 0 {
+				start = len(istrs) + 1 + start
+			}
+
+			if start > len(istrs) {
+				output = append(output, str+seqstr)
+				break
+			}
+
+			if len(istrs) > 0 {
+				start -= 1
+			}
+
+			output = append(output, string(istrs[:start])+seqstr+string(istrs[start:]))
 		default:
 			output = append(output, str)
 		}
@@ -263,7 +345,50 @@ func (r Rename) Seq(strs []string) []string {
 }
 
 func (r Rename) Shift(strs []string) []string {
-	return strs
+	var output []string
+	offset, err := strconv.Atoi(r.Value)
+	if err != nil {
+		return output
+	}
+	for _, str := range strs {
+		switch r.Mode {
+		case "plain":
+			num := r.Num
+			if r.Num <= 0 {
+				num = 1
+			}
+
+			strs := []rune(str)
+
+			start, end := 0, 0
+			for idx, index := range utils.Index(str, r.Expr) {
+				if idx+1 == num {
+					start = index
+					end = index + len([]rune(r.Expr))
+					break
+				}
+			}
+			if start == 0 && end == 0 {
+				output = append(output, str)
+				break
+			}
+
+			sub := strs[start:end]
+			tmp := append([]rune{}, strs[:start]...)
+			tmp = append(tmp, strs[end:]...)
+
+			index := start + offset
+			if index < 0 {
+				index = 0
+			}
+			if index > len(tmp) {
+				index = len(tmp)
+			}
+
+			output = append(output, string(tmp[:index])+string(sub)+string(tmp[index:]))
+		}
+	}
+	return output
 }
 
 func Load(fname string) (*Flow, error) {

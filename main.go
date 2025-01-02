@@ -36,7 +36,7 @@ func runflow() {
 
 	fmt.Println(flow.Run([]string{"月球陨落.Moonfall.2022.2160p.WEB-DL.x265.10bit.HDR.DDP5.1.Atmos-NOGRP.mkv"}))
 	//fmt.Println(flow.Run("月球.mkv"))
-	fmt.Println(utils.Seq("i", 1))
+	fmt.Println(utils.Index("月球陨落.Moonfall.2022.2160p.WEB-DL.x265.10bit.HDR.DDP5.1.Atmos-NOGRP.mkv", "o"))
 }
 
 func main() {
