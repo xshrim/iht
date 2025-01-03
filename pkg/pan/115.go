@@ -101,7 +101,7 @@ var headers = map[string]string{
 	"User-Agent":         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
 }
 
-type Client struct {
+type P115 struct {
 	Cookie string `json:"cookie"`
 }
 
@@ -160,7 +160,7 @@ func contains(elems []string, s string) bool {
 	return false
 }
 
-func (c *Client) FetchItem(fpath string) (FileItem, error) {
+func (c *P115) FetchItem(fpath string) (FileItem, error) {
 	cid := "0"
 	flist, err := c.FetchList(cid)
 	if err != nil {
@@ -203,7 +203,7 @@ func (c *Client) FetchItem(fpath string) (FileItem, error) {
 	return FileItem{}, fmt.Errorf("file %s not found", fpath)
 }
 
-func (c *Client) FetchList(cid string) ([]FileItem, error) {
+func (c *P115) FetchList(cid string) ([]FileItem, error) {
 	if cid == "" {
 		cid = "0"
 	}
@@ -215,7 +215,7 @@ func (c *Client) FetchList(cid string) ([]FileItem, error) {
 		header[key] = value
 	}
 
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	data, _, err := utils.Get(urlstr, time.Second*30, header)
 	if err != nil {
@@ -241,7 +241,7 @@ func (c *Client) FetchList(cid string) ([]FileItem, error) {
 
 }
 
-func (c *Client) FetchAttr(cid string) (FileAttr, error) {
+func (c *P115) FetchAttr(cid string) (FileAttr, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/category/get?cid=%s", cid)
 
 	header := make(map[string]string)
@@ -249,7 +249,7 @@ func (c *Client) FetchAttr(cid string) (FileAttr, error) {
 		header[key] = value
 	}
 
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	data, _, err := utils.Get(urlstr, time.Second*30, header)
 	if err != nil {
@@ -265,7 +265,7 @@ func (c *Client) FetchAttr(cid string) (FileAttr, error) {
 	return fstat, nil
 }
 
-func (c *Client) ExportDir(cid string) (string, error) {
+func (c *P115) ExportDir(cid string) (string, error) {
 
 	urlstr := "https://webapi.115.com/files/export_dir"
 
@@ -280,7 +280,7 @@ func (c *Client) ExportDir(cid string) (string, error) {
 		header[key] = value
 	}
 	header["Content-Type"] = "application/x-www-form-urlencoded"
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	data, _, err := utils.Post(urlstr, formDataStr, time.Second*30, header)
 	if err != nil {
@@ -302,14 +302,14 @@ func (c *Client) ExportDir(cid string) (string, error) {
 	}
 }
 
-func (c *Client) ExportResult(expid string) (ExportDirResult, error) {
+func (c *P115) ExportResult(expid string) (ExportDirResult, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/files/export_dir?export_id=%s", expid)
 
 	header := make(map[string]string)
 	for key, value := range headers {
 		header[key] = value
 	}
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	retry := 5
 	for {
@@ -341,14 +341,14 @@ func (c *Client) ExportResult(expid string) (ExportDirResult, error) {
 	}
 }
 
-func (c *Client) FetchDownloadPath(pickcode string) (ExportDownloadInfo, error) {
+func (c *P115) FetchDownloadPath(pickcode string) (ExportDownloadInfo, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/files/download?pickcode=%s", pickcode)
 
 	header := make(map[string]string)
 	for key, value := range headers {
 		header[key] = value
 	}
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	data, respcookie, err := utils.Get(urlstr, time.Second*30, header)
 	if err != nil {
@@ -367,7 +367,7 @@ func (c *Client) FetchDownloadPath(pickcode string) (ExportDownloadInfo, error) 
 	}
 }
 
-func (c *Client) DownloadFile(cookie, fileurl string) ([]byte, error) {
+func (c *P115) DownloadFile(cookie, fileurl string) ([]byte, error) {
 	urlstr := fileurl
 	header := make(map[string]string)
 	for key, value := range headers {
@@ -384,7 +384,7 @@ func (c *Client) DownloadFile(cookie, fileurl string) ([]byte, error) {
 	return data, nil
 }
 
-func (c *Client) DeleteFile(fid string) error {
+func (c *P115) DeleteFile(fid string) error {
 	urlstr := "https://webapi.115.com/rb/delete"
 
 	header := make(map[string]string)
@@ -393,7 +393,7 @@ func (c *Client) DeleteFile(fid string) error {
 	}
 
 	header["Content-Type"] = "application/x-www-form-urlencoded"
-	header["Cookie"] = cfg.Conf.Cookie
+	header["Cookie"] = c.Cookie
 
 	formValues := url.Values{}
 	formValues.Set("pid", "0")
@@ -417,7 +417,7 @@ func (c *Client) DeleteFile(fid string) error {
 	}
 }
 
-func (c *Client) ExportTree(cid string) ([]byte, error) {
+func (c *P115) ExportTree(cid string) ([]byte, error) {
 	expid, err := c.ExportDir(cid)
 	if err != nil {
 		return nil, err
@@ -452,7 +452,7 @@ func (c *Client) ExportTree(cid string) ([]byte, error) {
 	return idata, nil
 }
 
-func (c *Client) ExportTreeToFile(cid, path string) (string, error) {
+func (c *P115) ExportTreeToFile(cid, path string) (string, error) {
 
 	data, err := c.ExportTree(cid)
 	if err != nil {
@@ -572,37 +572,37 @@ func CleanNotExist(dir string, list []string) error {
 }
 
 func Attr(cid string) (FileAttr, error) {
-	client := Client{
-		Cookie: cfg.Conf.Cookie,
+	client := P115{
+		Cookie: cfg.Conf.P115.Cookie,
 	}
 
 	return client.FetchAttr(cid)
 }
 
 func Locate(fpath string) (FileItem, error) {
-	client := Client{
-		Cookie: cfg.Conf.Cookie,
+	client := P115{
+		Cookie: cfg.Conf.P115.Cookie,
 	}
 
 	return client.FetchItem(fpath)
 }
 
 func List(cid string) ([]FileItem, error) {
-	client := Client{
-		Cookie: cfg.Conf.Cookie,
+	client := P115{
+		Cookie: cfg.Conf.P115.Cookie,
 	}
 
 	return client.FetchList(cid)
 }
 
 func ToFile() {
-	client := Client{
-		Cookie: cfg.Conf.Cookie,
+	client := P115{
+		Cookie: cfg.Conf.P115.Cookie,
 	}
 
-	cid := cfg.Conf.Cid
+	cid := cfg.Conf.P115.Cid
 	if cid == "" {
-		if fitem, err := client.FetchItem(cfg.Conf.Cpath); err != nil {
+		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
 			gol.Errorf("Get Cid failed: %v", err)
 			return
 		} else {
@@ -610,18 +610,18 @@ func ToFile() {
 		}
 	}
 
-	fmt.Println(client.ExportTreeToFile(cid, cfg.Conf.Tree))
+	fmt.Println(client.ExportTreeToFile(cid, cfg.Conf.P115.Tree))
 }
 
 func Export() {
-	client := Client{
-		Cookie: cfg.Conf.Cookie,
+	client := P115{
+		Cookie: cfg.Conf.P115.Cookie,
 	}
 	gol.Info("Start to export directory tree")
 
-	cid := cfg.Conf.Cid
+	cid := cfg.Conf.P115.Cid
 	if cid == "" {
-		if fitem, err := client.FetchItem(cfg.Conf.Cpath); err != nil {
+		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
 			gol.Errorf("Get Cid failed: %v", err)
 			return
 		} else {
@@ -639,7 +639,7 @@ func Export() {
 		}
 	}
 
-	prefix := filepath.Join(cfg.Conf.Prefix, strings.Join(paths, "/"))
+	prefix := filepath.Join(cfg.Conf.P115.Prefix, strings.Join(paths, "/"))
 
 	data, err := client.ExportTree(cid)
 	if err != nil {
@@ -649,7 +649,7 @@ func Export() {
 	gol.Info("Export directory tree succeed")
 
 	gol.Info("Start to convert directory tree to library")
-	if err := Tree2Lib(cfg.Conf.Url, prefix, cfg.Conf.Base, data); err != nil {
+	if err := Tree2Lib(cfg.Conf.P115.Url, prefix, cfg.Conf.P115.Base, data); err != nil {
 		gol.Errorf("Convert directory tree to library failed: %v", err)
 		return
 	}

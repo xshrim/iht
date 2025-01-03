@@ -1,8 +1,58 @@
-cookie: "UID=1143614_I1_1733727252; CID=2aa893259e85a1927ac346b38cddc66d; SEID=e89346545ce9ff8767ca0757edd117ffe6fc65cefb5e654929f1749db8253e9a6133aa0027c7a4c911108a75743d80b1678751a6618d267bb3c4e9f1; KID=170f5d1d5321115a0fc8b326d2274519"
-cid: "64456581448"
-# cid: "3019274750636588129"
-cpath: ""
-base: "media"
-tree: "tree.txt"
-url: "http://192.168.31.2:5244"
-prefix: "/115"
+p115:
+  cookie: "UID=1143614_I1_1733727252; CID=2aa893259e85a1927ac346b38cddc66d; SEID=e89346545ce9ff8767ca0757edd117ffe6fc65cefb5e654929f1749db8253e9a6133aa0027c7a4c911108a75743d80b1678751a6618d267bb3c4e9f1; KID=170f5d1d5321115a0fc8b326d2274519"
+  cid: "64456581448"
+  # cid: "3019274750636588129"
+  cpath: ""
+  base: "media"
+  tree: "tree.txt"
+  url: "http://192.168.31.2:5244"
+  prefix: "/115"
+flow:
+  name: demo
+  steps:
+    - name: stage1
+      type: filter
+      actions:
+        - name: filter by extension
+          kind: include
+          mode: "suffix"
+          expr: "mkv"
+          num: 0
+    - name: stage2
+      type: rename
+      actions:
+        - name: add prefix
+          kind: add
+          mode: "regexp" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: "dasfasf"
+          value: "prefix_"
+          num: 0
+        - name: delete substring
+          kind: delete
+          mode: "index" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: "2" # or "1:3"
+          num: 3 # 0: all
+        - name: replace substring
+          kind: replace
+          mode: "index" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: "10" # or "1:3
+          value: "ok.dfes.fsafldfok.aadsff"
+          num: 0
+        - name: transfer substring
+          kind: transfer
+          mode: "regexp" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: ".*" # or "1:3
+          value: "upper"
+          num: 0
+        - name: add sequence
+          kind: seq
+          mode: "regexp" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: "\\d{4}" # or "1:3"
+          value: "A."
+          num: 0
+        - name: shift substring
+          kind: shift
+          mode: "suffix" # "plain", "prefix", "suffix", "index", "regexp"
+          expr: "mkv" # or "0:3"
+          value: "-1"
+          num: 0
