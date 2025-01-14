@@ -12,13 +12,13 @@ type Config struct {
 }
 
 type P115 struct {
-	Cookie string `json:"cookie"`
-	Cid    string `json:"cid"`
-	Cpath  string `json:"cpath"`
-	Base   string `json:"base"`
-	Tree   string `json:"tree"`
-	Url    string `json:"url"`
-	Prefix string `json:"prefix"`
+	Cookie  string `json:"cookie"`
+	Cid     string `json:"cid"`
+	Cpath   string `json:"cpath"`
+	Fpath   string `json:"fpath"`
+	Library string `json:"library"`
+	Url     string `json:"url"`
+	Prefix  string `json:"prefix"`
 }
 
 var Conf Config

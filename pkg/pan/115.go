@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"iht/pkg/cfg"
 	"iht/utils"
 	"net/url"
 	"os"
@@ -571,87 +570,102 @@ func CleanNotExist(dir string, list []string) error {
 	})
 }
 
-func Attr(cid string) (FileAttr, error) {
-	client := P115{
-		Cookie: cfg.Conf.P115.Cookie,
+func Treeify(fpath, url, prefix, library string) error {
+	if err := Tree2Lib(url, prefix, library, []byte(fpath)); err != nil {
+		return err
 	}
-
-	return client.FetchAttr(cid)
+	return nil
 }
 
-func Locate(fpath string) (FileItem, error) {
-	client := P115{
-		Cookie: cfg.Conf.P115.Cookie,
-	}
+// func Attr(cid string) (FileAttr, error) {
+// 	client := P115{
+// 		Cookie: cfg.Conf.P115.Cookie,
+// 	}
 
-	return client.FetchItem(fpath)
-}
+// 	return client.FetchAttr(cid)
+// }
 
-func List(cid string) ([]FileItem, error) {
-	client := P115{
-		Cookie: cfg.Conf.P115.Cookie,
-	}
+// func Locate(fpath string) (FileItem, error) {
+// 	client := P115{
+// 		Cookie: cfg.Conf.P115.Cookie,
+// 	}
 
-	return client.FetchList(cid)
-}
+// 	return client.FetchItem(fpath)
+// }
 
-func ToFile() {
-	client := P115{
-		Cookie: cfg.Conf.P115.Cookie,
-	}
+// func List(cid string) ([]FileItem, error) {
+// 	client := P115{
+// 		Cookie: cfg.Conf.P115.Cookie,
+// 	}
 
-	cid := cfg.Conf.P115.Cid
-	if cid == "" {
-		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
-			gol.Errorf("Get Cid failed: %v", err)
-			return
-		} else {
-			cid = fitem.Cid
-		}
-	}
+// 	return client.FetchList(cid)
+// }
 
-	fmt.Println(client.ExportTreeToFile(cid, cfg.Conf.P115.Tree))
-}
+// func ExportToFile() {
+// 	client := P115{
+// 		Cookie: cfg.Conf.P115.Cookie,
+// 	}
 
-func Export() {
-	client := P115{
-		Cookie: cfg.Conf.P115.Cookie,
-	}
-	gol.Info("Start to export directory tree")
+// 	cid := cfg.Conf.P115.Cid
+// 	if cid == "" {
+// 		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
+// 			gol.Errorf("Get Cid failed: %v\n", err)
+// 			return
+// 		} else {
+// 			if fitem.Fid == "" {
+// 				cid = fitem.Cid
+// 			} else {
+// 				cid = fitem.Fid
+// 			}
+// 		}
+// 	}
 
-	cid := cfg.Conf.P115.Cid
-	if cid == "" {
-		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
-			gol.Errorf("Get Cid failed: %v", err)
-			return
-		} else {
-			cid = fitem.Cid
-		}
-	}
+// 	fmt.Println(client.ExportTreeToFile(cid, cfg.Conf.P115.Fpath))
+// }
 
-	var paths []string
-	if attr, err := client.FetchAttr(cid); err == nil {
-		for _, path := range attr.Paths {
-			if fmt.Sprintf("%v", path.Fid) == "0" {
-				continue
-			}
-			paths = append(paths, path.Fname)
-		}
-	}
+// func Strm() {
+// 	client := P115{
+// 		Cookie: cfg.Conf.P115.Cookie,
+// 	}
+// 	gol.Info("Start to export directory tree")
 
-	prefix := filepath.Join(cfg.Conf.P115.Prefix, strings.Join(paths, "/"))
+// 	cid := cfg.Conf.P115.Cid
+// 	if cid == "" {
+// 		if fitem, err := client.FetchItem(cfg.Conf.P115.Cpath); err != nil {
+// 			gol.Errorf("Get Cid failed: %v\n", err)
+// 			return
+// 		} else {
+// 			if fitem.Fid == "" {
+// 				cid = fitem.Cid
+// 			} else {
+// 				cid = fitem.Fid
+// 			}
+// 		}
+// 	}
 
-	data, err := client.ExportTree(cid)
-	if err != nil {
-		gol.Errorf("Export directory tree failed: %v", err)
-		return
-	}
-	gol.Info("Export directory tree succeed")
+// 	var paths []string
+// 	if attr, err := client.FetchAttr(cid); err == nil {
+// 		for _, path := range attr.Paths {
+// 			if fmt.Sprintf("%v", path.Fid) == "0" {
+// 				continue
+// 			}
+// 			paths = append(paths, path.Fname)
+// 		}
+// 	}
 
-	gol.Info("Start to convert directory tree to library")
-	if err := Tree2Lib(cfg.Conf.P115.Url, prefix, cfg.Conf.P115.Base, data); err != nil {
-		gol.Errorf("Convert directory tree to library failed: %v", err)
-		return
-	}
-	gol.Info("Convert directory tree to library succeed")
-}
+// 	prefix := filepath.Join(cfg.Conf.P115.Prefix, strings.Join(paths, "/"))
+
+// 	data, err := client.ExportTree(cid)
+// 	if err != nil {
+// 		gol.Errorf("Export directory tree failed: %v\n", err)
+// 		return
+// 	}
+// 	gol.Info("Export directory tree succeed")
+
+// 	gol.Info("Start to convert directory tree to library")
+// 	if err := Tree2Lib(cfg.Conf.P115.Url, prefix, cfg.Conf.P115.Library, data); err != nil {
+// 		gol.Errorf("Convert directory tree to library failed: %v\n", err)
+// 		return
+// 	}
+// 	gol.Info("Convert directory tree to library succeed")
+// }
