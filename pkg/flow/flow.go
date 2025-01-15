@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/xshrim/gol"
+	"github.com/xshrim/gol/tk"
 	"gopkg.in/yaml.v2"
 )
 
@@ -881,6 +882,31 @@ func Load(fname string) (*Flow, error) {
 	return flow, nil
 }
 
+type Fiter struct {
+	Name string `json:"name"` // 过滤操作名称
+	Kind string `json:"kind"` // 过滤操作类型，include, exclude
+	Mode string `json:"mode"` // 过滤操作模式，equal, contain, prefix, suffix, regexp
+	Expr string `json:"expr"` // 过滤操作表达式, 文本, 正则表达式
+	Num  int    `json:"num"`  // 过滤操作次数, 最多匹配次数
+}
+
+func (f *Flow) List() string {
+	var output string
+	output += fmt.Sprintf("> Flow: %s\n", f.Name)
+	for _, step := range f.Steps {
+		output += fmt.Sprintf(">> Step: [%s] %s\n", step.Type, step.Name)
+		for _, action := range step.Actions {
+			actstr := tk.Jsonify(action)
+			name := tk.Jsquery(actstr, ".name")
+			kind := tk.Jsquery(actstr, ".kind")
+			mode := tk.Jsquery(actstr, ".mode")
+			expr := tk.Jsquery(actstr, ".expr")
+			output += fmt.Sprintf(">>> Action: %v <%v, %v, %v>\n", name, kind, mode, expr)
+		}
+	}
+	return output
+}
+
 func (f *Flow) Run(strs []string) ([]string, error) {
 	gol.Infof("run flow %s\n", f.Name)
 	// strs, _ := obj.([]string)
@@ -898,6 +924,8 @@ func (f *Flow) Run(strs []string) ([]string, error) {
 				if err != nil {
 					return strs, err
 				}
+
+				gol.Infof("start %s action [%s] %s\n", step.Type, filter.Kind, filter.Name)
 
 				switch filter.Kind {
 				case "include":
@@ -921,6 +949,8 @@ func (f *Flow) Run(strs []string) ([]string, error) {
 				if err != nil {
 					return strs, err
 				}
+
+				gol.Infof("start %s action [%s] %s\n", step.Type, rename.Kind, rename.Name)
 
 				switch rename.Kind {
 				case "add":
