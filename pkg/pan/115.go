@@ -87,7 +87,7 @@ var ignoreExt = []string{
 	".html",
 }
 
-var headers = map[string]string{
+var header115 = map[string]string{
 
 	"Origin":             "https://webapi.115.com",
 	"Referer":            "https://webapi.115.com/",
@@ -210,7 +210,7 @@ func (c *P115) FetchList(cid string) ([]FileItem, error) {
 	urlstr := fmt.Sprintf("https://aps.115.com/natsort/files.php?aid=1&cid=%s&o=file_name&asc=1&offset=0&show_dir=1&limit=1150&code=&scid=&snap=0&natsort=1&record_open_time=1&count_folders=1&type=&source=&format=json&fc_mix=0", cid)
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 
@@ -244,7 +244,7 @@ func (c *P115) FetchAttr(cid string) (FileAttr, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/category/get?cid=%s", cid)
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 
@@ -275,7 +275,7 @@ func (c *P115) ExportDir(cid string) (string, error) {
 	formDataStr := formValues.Encode()
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 	header["Content-Type"] = "application/x-www-form-urlencoded"
@@ -305,7 +305,7 @@ func (c *P115) ExportResult(expid string) (ExportDirResult, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/files/export_dir?export_id=%s", expid)
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 	header["Cookie"] = c.Cookie
@@ -344,7 +344,7 @@ func (c *P115) FetchDownloadPath(pickcode string) (ExportDownloadInfo, error) {
 	urlstr := fmt.Sprintf("https://webapi.115.com/files/download?pickcode=%s", pickcode)
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 	header["Cookie"] = c.Cookie
@@ -369,7 +369,7 @@ func (c *P115) FetchDownloadPath(pickcode string) (ExportDownloadInfo, error) {
 func (c *P115) DownloadFile(cookie, fileurl string) ([]byte, error) {
 	urlstr := fileurl
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 	header["Cookie"] = cookie
@@ -387,7 +387,7 @@ func (c *P115) DeleteFile(fid string) error {
 	urlstr := "https://webapi.115.com/rb/delete"
 
 	header := make(map[string]string)
-	for key, value := range headers {
+	for key, value := range header115 {
 		header[key] = value
 	}
 

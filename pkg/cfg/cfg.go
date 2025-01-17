@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	P115 P115           `yaml:"p115"`
+	P123 P123           `yaml:"p123"`
 	Flow map[string]any `yaml:"flow"`
 }
 
@@ -19,6 +20,13 @@ type P115 struct {
 	Library string `json:"library"`
 	Url     string `json:"url"`
 	Prefix  string `json:"prefix"`
+}
+
+type P123 struct {
+	Id     string `json:"id"`
+	Secret string `json:"secret"`
+	Cid    string `json:"cid"`
+	Cpath  string `json:"cpath"`
 }
 
 var Conf Config
