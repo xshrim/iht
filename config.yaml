@@ -1,9 +1,10 @@
 p115:
   cookie: "UID=1143614_I1_1733727252; CID=2aa893259e85a1927ac346b38cddc66d; SEID=e89346545ce9ff8767ca0757edd117ffe6fc65cefb5e654929f1749db8253e9a6133aa0027c7a4c911108a75743d80b1678751a6618d267bb3c4e9f1; KID=170f5d1d5321115a0fc8b326d2274519"
-  #cid: "64456581448"
+  cid: "64456581448"
   #cid: "3019274750636588129"
-  cpath: "/我的视频/电影/日韩/娜塔莉的情人.Natalie.2010/娜塔莉的情人.Natalie.2010.rmvb"
-  library: "media"
+  #cpath: "/我的视频/电影/日韩/娜塔莉的情人.Natalie.2010/娜塔莉的情人.Natalie.2010.rmvb"
+  #library: "/home/xshrim/media"
+  library: "/home/xshrim/media"
   fpath: "tree.txt"
   url: "http://192.168.31.2:5244"
   prefix: "/115"

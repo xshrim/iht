@@ -150,7 +150,7 @@ type ExportDownloadInfo struct {
 }
 
 func contains(elems []string, s string) bool {
-	s = strings.TrimLeft(s, "./")
+	s = strings.TrimPrefix(s, "./")
 	for _, elem := range elems {
 		if elem == s || strings.HasPrefix(filepath.Dir(elem)+"/", s+"/") {
 			return true
