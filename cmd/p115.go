@@ -228,7 +228,7 @@ var p115pathCmd = &cobra.Command{
 			}
 			paths = append(paths, fileattr.Name)
 
-			fmt.Printf("Get file path succeed: %s\n", strings.Join(paths, "/"))
+			fmt.Printf("文件路径: %s\n", strings.Join(paths, "/"))
 		}
 
 	},
@@ -258,7 +258,7 @@ var p115cidCmd = &cobra.Command{
 		}
 
 		if fitem, err := client.FetchItem(cpath); err != nil {
-			gol.Errorf("Get cid failed: %v\n", err)
+			gol.Errorf("Get file cid failed: %v\n", err)
 		} else {
 			var cid, fid string
 			ftype := "文件"

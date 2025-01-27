@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云盘助手</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>工作流 Demo</h1>
+    <div class="steps">
+      <div class="step active" data-step="1">
+        <div class="step-header">步骤 1: 填写基本信息</div>
+        <div class="step-content">
+          <label for="name">姓名:</label>
+          <input type="text" id="name" placeholder="请输入姓名"><br>
+          <label for="email">邮箱:</label>
+          <input type="email" id="email" placeholder="请输入邮箱"><br>
+          <button class="next-btn">下一步</button>
+        </div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-header">步骤 2: 选择偏好</div>
+        <div class="step-content">
+          <label for="fav-color">喜欢的颜色:</label>
+          <select id="fav-color">
+            <option value="red">红色</option>
+            <option value="blue">蓝色</option>
+            <option value="green">绿色</option>
+          </select><br>
+          <label>你喜欢宠物吗?</label><br>
+          <input type="radio" name="pet" id="yes" value="yes"> <label for="yes">是</label>
+          <input type="radio" name="pet" id="no" value="no"> <label for="no">否</label><br>
+          <button class="prev-btn">上一步</button>
+          <button class="next-btn">下一步</button>
+        </div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-header">步骤 3: 确认提交</div>
+        <div class="step-content">
+          <p>请确认你的信息：</p>
+          <div id="confirmation-area">
+            <!-- 信息展示区域 -->
+          </div>
+          <button class="prev-btn">上一步</button>
+          <button class="submit-btn">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="static/script.js"></script>
+</body>
+
+</html>

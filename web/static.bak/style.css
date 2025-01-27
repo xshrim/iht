@@ -1,0 +1,98 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  /* 限制最大宽度，避免在平板等屏幕上过宽 */
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* 步骤之间的间距 */
+}
+
+.step {
+  display: none;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.step.active {
+  display: block;
+}
+
+.step-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.step-content label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.step-content input,
+.step-content select {
+  margin-bottom: 10px;
+  width: calc(100% - 22px);
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.step-content .next-btn,
+.step-content .prev-btn,
+.step-content .submit-btn {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.step-content .prev-btn {
+  background-color: #bbb;
+}
+
+.step-content .submit-btn {
+  background-color: #007bff;
+}
+
+@media (max-width: 768px) {
+
+  /* 针对手机屏幕的适配 */
+  .container {
+    width: 95%;
+    /* 在小屏幕上更充分利用空间 */
+    padding: 15px;
+  }
+
+  .step {
+    padding: 15px;
+  }
+}

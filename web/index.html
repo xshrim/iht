@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云盘助手</title>
+  <link rel="shortcut icon" href="static/favicon.ico">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+
+<body>
+  <section class="container">
+    <div class="container">
+      <h1>云盘助手</h1>
+      <div class="step-header">
+        <div id="step-info"></div>
+        <div class="add-step-dropdown">
+          <button id="add-step-btn">添加步骤</button>
+          <div class="dropdown-content" id="dropdown-content">
+            <a href="#" data-type="filter-include">过滤-白名单</a>
+            <a href="#" data-type="filter-exclude">过滤-黑名单</a>
+            <a href="#" data-type="rename-add">重命名-添加</a>
+            <a href="#" data-type="rename-delete">重命名-删除</a>
+            <a href="#" data-type="rename-replace">重命名-替换</a>
+            <a href="#" data-type="rename-transfer">重命名-变换</a>
+            <a href="#" data-type="rename-seq">重命名-序号</a>
+            <a href="#" data-type="rename-shift">重命名-偏移</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps">
+      </div>
+    </div>
+  </section>
+  <div class="modal-overlay">
+    <div class="modal">
+      <p class="modal-text"></p>
+    </div>
+  </div>
+  <script src="static/script.js"></script>
+  <script src="static/diffmatchpatch.js"></script>
+</body>
+
+</html>

@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	P115 P115           `yaml:"p115"`
-	P123 P123           `yaml:"p123"`
-	Flow map[string]any `yaml:"flow"`
+	P115   P115           `yaml:"p115"`
+	P123   P123           `yaml:"p123"`
+	Flow   map[string]any `yaml:"flow"`
+	Server Server         `yaml:"server"`
 }
 
 type P115 struct {
@@ -23,10 +24,19 @@ type P115 struct {
 }
 
 type P123 struct {
-	Id     string `json:"id"`
-	Secret string `json:"secret"`
-	Cid    string `json:"cid"`
-	Cpath  string `json:"cpath"`
+	Id      string   `json:"id"`
+	Secret  string   `json:"secret"`
+	Token   string   `json:"token"`
+	Cid     string   `json:"cid"`
+	Cpath   string   `json:"cpath"`
+	Cname   string   `json:"cname"`
+	Rlist   []string `json:"rlist"`
+	Keyword string   `json:"keyword"`
+}
+
+type Server struct {
+	Port int    `json:"port"`
+	Dir  string `json:"dir"`
 }
 
 var Conf Config
